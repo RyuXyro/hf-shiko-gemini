@@ -5,7 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>⛺ Nadeshiko DevSecOps AI</title>
         <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script>
+            const s = document.createElement("script");
+            s.src = "https://jsdelivr.net" + "/npm/marked/marked.min.js";
+            document.head.appendChild(s);
+        </script>
         <style>
             body {
                 background-color: #0b1120;
@@ -383,7 +387,7 @@
                     return s.id !== id;
                 });
                 if (activeSessionId === id) {
-                    activeSessionId = sessions.length > 0 ? sessions.id : null;
+                    activeSessionId = sessions.length > 0 ? sessions.at(0).id : null;
                 }
                 if (!activeSessionId) {
                     createNewSession();
@@ -474,7 +478,7 @@
             });
             fileInput.addEventListener("change", function (e) {
                 if (e.target.files && e.target.files.length > 0) {
-                    processImageFile(e.target.files);
+                    processImageFile(e.target.files.item(0));
                 }
             });
             function processImageFile(file) {
@@ -551,40 +555,66 @@
             function appendMessage(sender, content, isImage, userImgSrc) {
                 const wrapper = document.createElement("div");
                 wrapper.className = sender === "user" ? "flex justify-end" : "flex justify-start";
+
                 const bubble = document.createElement("div");
                 bubble.className =
                     sender === "user"
                         ? "bg-slate-800 border border-slate-700 text-slate-100 rounded-2xl rounded-br-sm px-4 py-3 max-w-2xl text-sm whitespace-pre-wrap"
                         : "text-slate-100 rounded-2xl px-2 py-1 max-w-3xl w-full text-sm prose prose-invert";
+
                 if (sender === "user") {
-                    let html = "";
                     if (userImgSrc) {
-                        html += "";
+                        const imgEl = document.createElement("img");
+                        imgEl.src = userImgSrc;
+                        imgEl.className = "max-h-48 rounded-lg mb-2 border border-slate-600";
+                        bubble.appendChild(imgEl);
                     }
-                    const safeText = content
-                        ? String(content).replace(/</g, "<").replace(/>/g, ">")
-                        : "(Mengirim gambar)";
-                    html += safeText;
-                    bubble.innerHTML = html;
-                } else if (isImage && content && content.url) {
-                    bubble.innerHTML = "⛺Taraaa! Gambarnya sudah jadi! ✨";
+                    const textSpan = document.createElement("span");
+                    textSpan.textContent = content ? String(content) : "(Mengirim gambar)";
+                    bubble.appendChild(textSpan);
                 } else {
-                    const parsedHtml = typeof marked !== "undefined" ? marked.parse(String(content)) : String(content);
-                    bubble.innerHTML = "⛺" + parsedHtml + "";
+                    const row = document.createElement("div");
+                    row.className = "flex items-start gap-3";
+
+                    const avatar = document.createElement("span");
+                    avatar.className = "text-xl mt-0.5 shrink-0";
+                    avatar.textContent = "⛺";
+
+                    const bodyDiv = document.createElement("div");
+                    bodyDiv.className = "min-w-0 flex-1";
+                    bodyDiv.innerHTML = typeof marked !== "undefined" ? marked.parse(String(content)) : String(content);
+
+                    // Merapikan gambar hasil /gambar dan menambahkan tombol unduh otomatis
+                    bodyDiv.querySelectorAll("img").forEach(function (img) {
+                        img.className = "rounded-xl max-w-sm mb-2 border border-slate-700 shadow-lg";
+                        const dlLink = document.createElement("a");
+                        dlLink.href = img.src;
+                        dlLink.download = "nadeshiko-art-" + Date.now() + ".jpg";
+                        dlLink.className =
+                            "inline-block text-xs bg-slate-800 hover:bg-pink-500 text-slate-200 hover:text-white px-3 py-1.5 rounded-lg border border-slate-700 mb-3 transition no-underline";
+                        dlLink.textContent = "⬇️ Unduh Gambar";
+                        img.insertAdjacentElement("afterend", dlLink);
+                    });
+
+                    row.appendChild(avatar);
+                    row.appendChild(bodyDiv);
+                    bubble.appendChild(row);
                     enhanceCodeBlocks(bubble);
                 }
+
                 wrapper.appendChild(bubble);
                 chatContainer.appendChild(wrapper);
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return bubble;
             }
+
             chatForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
                 const text = userInput.value.trim();
                 const currentImg = attachedImageBase64;
                 if (!text && !currentImg) return;
+
                 const currentSession = getActiveSession();
-                // Jika ini pesan pertama di sesi baru, bersihkan layar sapaan & buat judul otomatis
                 if (currentSession.messages.length === 0) {
                     chatContainer.innerHTML = "";
                     const rawTitle = text || "Analisis Gambar";
@@ -592,13 +622,21 @@
                     currentChatTitle.textContent = currentSession.title;
                     renderSidebar();
                 }
+
                 appendMessage("user", text, false, currentImg);
                 userInput.value = "";
                 userInput.style.height = "auto";
                 removeAttachedImage();
                 sendBtn.disabled = true;
                 sendBtn.textContent = "...";
-                const loadingBubble = appendMessage("ai", "⏳ Nadeshiko sedang berpikir...", false, null);
+
+                const loadingBubble = appendMessage(
+                    "ai",
+                    "⏳ *Nadeshiko sedang berpikir / menggambar...*",
+                    false,
+                    null
+                );
+
                 try {
                     const res = await fetch("/api/chat", {
                         method: "POST",
@@ -611,32 +649,40 @@
                             password: savedPassword,
                         }),
                     });
+
                     const data = await res.json();
                     loadingBubble.parentElement.remove();
+
                     if (res.status === 401) {
                         logout();
                         return;
                     }
+
                     if (!res.ok) {
-                        appendMessage("ai", "⚠️ Error: " + (data.error || "Terjadi kesalahan"), false, null);
+                        appendMessage("ai", "⚠️ **Error:** " + (data.error || "Terjadi kesalahan"), false, null);
                         return;
                     }
+
                     currentSession.messages.push({ role: "user", content: text || "[Mengunggah Gambar]" });
-                    const reply = Array.isArray(data.reply) ? data.reply : data.reply;
-                    if (reply && typeof reply === "object" && reply.url) {
-                        appendMessage("ai", reply, true, null);
-                        currentSession.messages.push({ role: "assistant", content: "[Membuat gambar]", isImage: true });
-                    } else {
-                        appendMessage("ai", reply, false, null);
-                        currentSession.messages.push({ role: "assistant", content: String(reply) });
-                    }
+
+                    // Mengambil teks balasan dengan aman menggunakan .at(0)
+                    const replyText = Array.isArray(data.reply) ? data.reply.at(0) : data.reply;
+                    appendMessage("ai", replyText, false, null);
+
+                    // Simpan placeholder teks di localStorage jika isinya gambar Base64 agar browser tidak penuh
+                    const savedText =
+                        String(replyText).indexOf("data:image") !== -1
+                            ? "🎨 *[Gambar telah dibuat sesuai permintaan]*"
+                            : String(replyText);
+                    currentSession.messages.push({ role: "assistant", content: savedText });
+
                     if (currentSession.messages.length > 30) {
                         currentSession.messages = currentSession.messages.slice(-30);
                     }
                     saveSessions();
                 } catch (err) {
                     loadingBubble.parentElement.remove();
-                    appendMessage("ai", "⚠️ Koneksi gagal: " + err.message, false, null);
+                    appendMessage("ai", "⚠️ **Koneksi gagal:** " + err.message, false, null);
                 } finally {
                     sendBtn.disabled = false;
                     sendBtn.textContent = "Kirim";
