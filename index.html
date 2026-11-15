@@ -12,21 +12,51 @@
                 color: #f8fafc;
             }
             .prose pre {
-                background: #1e293b;
-                padding: 1rem;
-                border-radius: 0.5rem;
+                background: #020617;
+                border: 1px solid #1e293b;
+                padding: 2.25rem 1rem 1rem 1rem;
+                border-radius: 0.75rem;
                 overflow-x: auto;
-                margin-top: 0.5rem;
+                margin-top: 0.75rem;
+                margin-bottom: 0.75rem;
+                position: relative;
             }
             .prose code {
                 color: #38bdf8;
-                font-family: monospace;
+                font-family: ui-monospace, monospace;
+                font-size: 0.85rem;
+            }
+            .prose p {
+                margin-bottom: 0.5rem;
+            }
+            .prose ul,
+            .prose ol {
+                margin-left: 1.25rem;
+                list-style-type: disc;
+                margin-bottom: 0.5rem;
+            }
+            .copy-btn {
+                position: absolute;
+                top: 0.45rem;
+                right: 0.5rem;
+                background: #1e293b;
+                color: #cbd5e1;
+                font-size: 0.7rem;
+                padding: 0.2rem 0.55rem;
+                border-radius: 0.375rem;
+                border: 1px solid #334155;
+                cursor: pointer;
+                transition: all 0.15s;
+            }
+            .copy-btn:hover {
+                background: #ec4899;
+                color: white;
+                border-color: #ec4899;
             }
         </style>
     </head>
-
     <body class="h-screen flex overflow-hidden font-sans">
-        <!-- Layar Login (Terkunci sebelum password benar) -->
+        <!-- Layar Login -->
         <div id="login-screen" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 max-w-sm w-full shadow-2xl text-center">
                 <div class="text-5xl mb-3">⛺🔒</div>
@@ -55,8 +85,8 @@
 
         <!-- Sidebar Dashboard -->
         <aside class="w-72 bg-slate-900 border-r border-slate-800 p-5 flex flex-col justify-between hidden md:flex">
-            <div>
-                <div class="flex items-center gap-3 mb-6">
+            <div class="space-y-6">
+                <div class="flex items-center gap-3">
                     <span class="text-3xl">⛺</span>
                     <div>
                         <h1 class="font-bold text-lg text-pink-400">Nadeshiko AI</h1>
@@ -64,32 +94,54 @@
                     </div>
                 </div>
 
-                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Mode Cepat</p>
-                <div class="space-y-2">
-                    <button
-                        onclick="setPrompt('Bantu review celah keamanan dan optimasi kode ini:\n')"
-                        class="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-sm transition flex items-center gap-2"
+                <!-- Pemilih Model AI -->
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2"
+                        >Otak Model AI</label
                     >
-                        <span>🛡️</span> Audit Keamanan Kode
-                    </button>
-                    <button
-                        onclick="setPrompt('Buatkan skrip otomatisasi untuk: ')"
-                        class="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-sm transition flex items-center gap-2"
+                    <select
+                        id="model-select"
+                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-pink-400"
                     >
-                        <span>💻</span> Generator Skrip Coding
-                    </button>
-                    <button
-                        onclick="setPrompt('Susun jadwal & prioritas tugas saya hari ini:\n')"
-                        class="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-sm transition flex items-center gap-2"
-                    >
-                        <span>📋</span> Planner Harian
-                    </button>
-                    <button
-                        onclick="setPrompt('/gambar ')"
-                        class="w-full text-left px-3 py-2.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-300 border border-pink-500/20 text-sm transition flex items-center gap-2"
-                    >
-                        <span>🎨</span> Buat Gambar Gratis
-                    </button>
+                        <option value="gemini-3.5-flash-lite">⚡ Gemini 3.5 Flash Lite (Irit & Cepat)</option>
+                        <option value="gemini-3.8-flash">🔥 Gemini 3.8 Flash (Seimbang)</option>
+                        <option value="gemini-4-hydrogen">🧠 Gemini 4 Hydrogen (Coding Berat)</option>
+                    </select>
+                </div>
+
+                <!-- Mode Cepat -->
+                <div>
+                    <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Mode Cepat</p>
+                    <div class="space-y-2">
+                        <button
+                            type="button"
+                            onclick="setPrompt('Bantu review celah keamanan dan optimasi kode ini:\n')"
+                            class="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-sm transition flex items-center gap-2"
+                        >
+                            <span>🛡️</span> Audit Keamanan Kode
+                        </button>
+                        <button
+                            type="button"
+                            onclick="setPrompt('Buatkan skrip otomatisasi untuk: ')"
+                            class="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-sm transition flex items-center gap-2"
+                        >
+                            <span>💻</span> Generator Skrip Coding
+                        </button>
+                        <button
+                            type="button"
+                            onclick="setPrompt('Susun jadwal dan prioritas tugas saya hari ini:\n')"
+                            class="w-full text-left px-3 py-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 text-sm transition flex items-center gap-2"
+                        >
+                            <span>📋</span> Planner Harian
+                        </button>
+                        <button
+                            type="button"
+                            onclick="setPrompt('/gambar ')"
+                            class="w-full text-left px-3 py-2.5 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-300 border border-pink-500/20 text-sm transition flex items-center gap-2"
+                        >
+                            <span>🎨</span> Buat Gambar Gratis
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -97,11 +149,12 @@
                 <div class="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 text-xs text-slate-400">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="text-slate-200 font-medium">Terhubung ke Private Space</span>
+                        <span class="text-slate-200 font-medium">Memori & Multimodal Aktif</span>
                     </div>
-                    Endpoint: <code>ryuxyro/shiko-gemini</code>
+                    Support <code>Ctrl+V</code> Screenshot
                 </div>
                 <button
+                    type="button"
                     onclick="logout()"
                     class="w-full py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 text-xs font-medium transition"
                 >
@@ -116,34 +169,62 @@
                 <span class="font-semibold text-sm text-slate-200">🔥 Ruang Kerja Pribadi — Siap Membantu!</span>
                 <div class="flex gap-2">
                     <button
+                        type="button"
                         onclick="clearChat()"
                         class="text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded bg-slate-800"
                     >
-                        Bersihkan Layar
+                        Hapus Memori Chat
                     </button>
-                    <button onclick="logout()" class="md:hidden text-xs text-red-400 px-2.5 py-1 rounded bg-slate-800">
+                    <button
+                        type="button"
+                        onclick="logout()"
+                        class="md:hidden text-xs text-red-400 px-2.5 py-1 rounded bg-slate-800"
+                    >
                         Logout
                     </button>
                 </div>
             </header>
 
-            <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <div class="bg-slate-800/70 border border-slate-700 rounded-2xl p-4 max-w-2xl">
-                    <p class="text-sm leading-relaxed">
-                        Yahallo! Aku <b>Nadeshiko</b>! ⛺✨<br />Mau ngoding, ngecek celah keamanan sistem, nyusun
-                        jadwal harian, atau bikin gambar (ketik <code>/gambar ...</code>)? Ayo kita kerjakan
-                        bareng-bareng!
-                    </p>
+            <div id="chat-box" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
+
+            <!-- Pratinjau Gambar Sebelum Dikirim -->
+            <div id="image-preview-bar" class="hidden px-6 py-2 bg-slate-900 border-t border-slate-800">
+                <div class="max-w-4xl mx-auto flex items-center gap-3">
+                    <img
+                        id="image-preview-thumb"
+                        src=""
+                        class="h-14 w-14 object-cover rounded-lg border border-pink-400"
+                    />
+                    <div class="flex-1 text-xs text-slate-300">
+                        <p class="font-semibold text-pink-300">Gambar terlampir siap dianalisis!</p>
+                        <p class="text-slate-400">Ketik pertanyaan atau langsung klik Kirim.</p>
+                    </div>
+                    <button
+                        type="button"
+                        onclick="removeAttachedImage()"
+                        class="text-xs bg-slate-800 hover:bg-red-500/20 text-red-400 px-3 py-1.5 rounded-lg"
+                    >
+                        ✕ Batal
+                    </button>
                 </div>
             </div>
 
             <!-- Input Pesan -->
             <form id="chat-form" class="p-4 border-t border-slate-800 bg-slate-900/80">
-                <div class="max-w-4xl mx-auto flex gap-3">
+                <div class="max-w-4xl mx-auto flex gap-2 items-end">
+                    <input type="file" id="file-input" accept="image/*" class="hidden" />
+                    <button
+                        type="button"
+                        onclick="document.getElementById('file-input').click()"
+                        title="Unggah Gambar / Screenshot"
+                        class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 px-3.5 py-3 rounded-xl text-sm transition"
+                    >
+                        📎
+                    </button>
                     <textarea
                         id="user-input"
                         rows="1"
-                        placeholder="Ketik perintah, tempel kode, atau tulis /gambar..."
+                        placeholder="Ketik perintah, tempel kode, Ctrl+V gambar, atau /gambar..."
                         class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-pink-400 resize-none"
                     ></textarea>
                     <button
@@ -168,28 +249,102 @@
             const chatForm = document.getElementById("chat-form");
             const userInput = document.getElementById("user-input");
             const sendBtn = document.getElementById("send-btn");
+            const modelSelect = document.getElementById("model-select");
+            const fileInput = document.getElementById("file-input");
+            const previewBar = document.getElementById("image-preview-bar");
+            const previewThumb = document.getElementById("image-preview-thumb");
 
             let savedPassword = sessionStorage.getItem("nadeshiko_pass") || "";
+            let chatHistory = [];
+            try {
+                chatHistory = JSON.parse(localStorage.getItem("nadeshiko_history") || "[]");
+            } catch (e) {
+                chatHistory = [];
+            }
+            let attachedImageBase64 = null;
 
-            // Cek sesi login otomatis saat halaman dimuat
             if (savedPassword) {
                 loginScreen.classList.add("hidden");
             }
 
-            loginForm.addEventListener("submit", async (e) => {
+            userInput.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    chatForm.dispatchEvent(new Event("submit"));
+                }
+            });
+
+            window.addEventListener("paste", function (e) {
+                if (!e.clipboardData || !e.clipboardData.items) return;
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf("image/") === 0) {
+                        const file = items[i].getAsFile();
+                        processImageFile(file);
+                    }
+                }
+            });
+
+            fileInput.addEventListener("change", function (e) {
+                if (e.target.files && e.target.files.length > 0) {
+                    processImageFile(e.target.files[0]);
+                }
+            });
+
+            function processImageFile(file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    attachedImageBase64 = event.target.result;
+                    previewThumb.src = attachedImageBase64;
+                    previewBar.classList.remove("hidden");
+                };
+                reader.readAsDataURL(file);
+            }
+            function removeAttachedImage() {
+                attachedImageBase64 = null;
+                fileInput.value = "";
+                previewBar.classList.add("hidden");
+            }
+            function enhanceCodeBlocks(container) {
+                const blocks = container.querySelectorAll("pre");
+                blocks.forEach(function (pre) {
+                    if (pre.querySelector(".copy-btn")) return;
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "copy-btn";
+                    btn.textContent = "Salin Kode";
+                    btn.onclick = function () {
+                        const codeEl = pre.querySelector("code");
+                        const codeText = codeEl ? codeEl.innerText : pre.innerText;
+                        navigator.clipboard.writeText(codeText);
+                        btn.textContent = "Tersalin!";
+                        setTimeout(function () {
+                            btn.textContent = "Salin Kode";
+                        }, 2000);
+                    };
+                    pre.appendChild(btn);
+                });
+            }
+            function renderInitialHistory() {
+                chatBox.innerHTML = `Yahallo! Aku Nadeshiko! ⛺✨
+Sekarang aku sudah bisa mengingat obrolan kita, menerima upload/paste screenshot, ganti model AI, dan bikin gambar (/gambar ...). Ayo mulai!`;
+                chatHistory.forEach(function (msg) {
+                    appendMessage(msg.role === "user" ? "user" : "ai", msg.content, msg.isImage, msg.userImg);
+                });
+            }
+            renderInitialHistory();
+            loginForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
                 const pass = passwordInput.value;
                 loginBtn.disabled = true;
                 loginBtn.textContent = "Memeriksa...";
                 loginError.classList.add("hidden");
-
                 try {
                     const res = await fetch("/api/chat", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ password: pass, verifyOnly: true }),
                     });
-
                     if (res.ok) {
                         savedPassword = pass;
                         sessionStorage.setItem("nadeshiko_pass", pass);
@@ -205,88 +360,102 @@
                     loginBtn.textContent = "Buka Dashboard";
                 }
             });
-
             function logout() {
                 sessionStorage.removeItem("nadeshiko_pass");
                 savedPassword = "";
                 passwordInput.value = "";
                 loginScreen.classList.remove("hidden");
             }
-
             function setPrompt(text) {
                 userInput.value = text;
                 userInput.focus();
             }
-
             function clearChat() {
-                chatBox.innerHTML = "";
+                chatHistory = [];
+                localStorage.removeItem("nadeshiko_history");
+                renderInitialHistory();
             }
-
-            function appendMessage(sender, content, isImage = false) {
+            function appendMessage(sender, content, isImage, userImgSrc) {
                 const wrapper = document.createElement("div");
                 wrapper.className = sender === "user" ? "flex justify-end" : "flex justify-start";
-
                 const bubble = document.createElement("div");
                 bubble.className =
                     sender === "user"
                         ? "bg-pink-600 text-white rounded-2xl px-4 py-3 max-w-2xl text-sm whitespace-pre-wrap"
                         : "bg-slate-800/90 border border-slate-700 text-slate-100 rounded-2xl px-5 py-4 max-w-3xl text-sm prose prose-invert";
-
-                if (isImage && content.url) {
-                    bubble.innerHTML = `<img src="${content.url}" alt="Generated Image" class="rounded-xl max-w-sm mb-2 border border-slate-600" /><p class="text-xs text-pink-300">Taraaa! Gambarnya sudah jadi! ✨⛺</p>`;
+                if (sender === "user") {
+                    let html = "";
+                    if (userImgSrc) {
+                        html += "";
+                    }
+                    const safeText = content
+                        ? String(content).replace(/</g, "<").replace(/>/g, ">")
+                        : "(Mengirim gambar)";
+                    html += safeText;
+                    bubble.innerHTML = html;
+                } else if (isImage && content && content.url) {
+                    bubble.innerHTML = "Taraaa! Gambarnya sudah jadi! ✨⛺";
                 } else {
-                    bubble.innerHTML = sender === "user" ? content : marked.parse(String(content));
+                    bubble.innerHTML = marked.parse(String(content));
+                    enhanceCodeBlocks(bubble);
                 }
-
                 wrapper.appendChild(bubble);
                 chatBox.appendChild(wrapper);
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return bubble;
             }
-
-            chatForm.addEventListener("submit", async (e) => {
+            chatForm.addEventListener("submit", async function (e) {
                 e.preventDefault();
                 const text = userInput.value.trim();
-                if (!text) return;
-
-                appendMessage("user", text);
+                const currentImg = attachedImageBase64;
+                if (!text && !currentImg) return;
+                appendMessage("user", text, false, currentImg);
                 userInput.value = "";
+                removeAttachedImage();
                 sendBtn.disabled = true;
                 sendBtn.textContent = "Memproses...";
-
-                const loadingBubble = appendMessage("ai", "⏳ *Nadeshiko sedang berpikir / menggambar...*");
-
+                const loadingBubble = appendMessage(
+                    "ai",
+                    "⏳ Nadeshiko sedang berpikir / menganalisis...",
+                    false,
+                    null
+                );
                 try {
                     const res = await fetch("/api/chat", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ message: text, password: savedPassword }),
+                        body: JSON.stringify({
+                            message: text,
+                            imageBase64: currentImg,
+                            model: modelSelect.value,
+                            history: chatHistory,
+                            password: savedPassword,
+                        }),
                     });
-
                     const data = await res.json();
                     loadingBubble.parentElement.remove();
-
                     if (res.status === 401) {
                         logout();
                         return;
                     }
-
                     if (!res.ok) {
-                        appendMessage("ai", `⚠️ **Error:** ${data.error || "Terjadi kesalahan"}`);
+                        appendMessage("ai", "⚠️ Error: " + (data.error || "Terjadi kesalahan"), false, null);
                         return;
                     }
-
-                    const reply = Array.isArray(data.reply) ? data.reply : data.reply;
-                    if (Array.isArray(reply) && reply?.url) {
-                        appendMessage("ai", reply, true);
-                    } else if (typeof reply === "object" && reply?.url) {
-                        appendMessage("ai", reply, true);
+                    chatHistory.push({ role: "user", content: text || "[Mengunggah Gambar]" });
+                    const reply = Array.isArray(data.reply) ? data.reply[0] : data.reply;
+                    if (reply && typeof reply === "object" && reply.url) {
+                        appendMessage("ai", reply, true, null);
+                        chatHistory.push({ role: "assistant", content: "[Membuat gambar sesuai permintaan]" });
                     } else {
-                        appendMessage("ai", reply);
+                        appendMessage("ai", reply, false, null);
+                        chatHistory.push({ role: "assistant", content: String(reply) });
                     }
+                    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+                    localStorage.setItem("nadeshiko_history", JSON.stringify(chatHistory));
                 } catch (err) {
                     loadingBubble.parentElement.remove();
-                    appendMessage("ai", `⚠️ **Koneksi gagal:** ${err.message}`);
+                    appendMessage("ai", "⚠️ Koneksi gagal: " + err.message, false, null);
                 } finally {
                     sendBtn.disabled = false;
                     sendBtn.textContent = "Kirim";
